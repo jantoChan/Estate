@@ -1,1 +1,1 @@
-web: node backend-server/crawler-server.js
+web: node crawler-server.js

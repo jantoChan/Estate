@@ -1,0 +1,21 @@
+{
+  "name": "estate",
+  "version": "1.0.0",
+  "description": "",
+  "main": "crawler-server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cheerio": "^0.22.0",
+    "ejs": "^2.5.5",
+    "http-proxy": "^1.16.2",
+    "iconv": "^2.2.1",
+    "node-schedule": "^1.2.0",
+    "request": "^2.79.0",
+    "superagent": "^3.3.1",
+    "util": "^0.10.3"
+  }
+}

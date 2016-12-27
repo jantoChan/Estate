@@ -6,11 +6,13 @@ const url = require('url')
 const util = require('util')
 const schedule = require('node-schedule')
 const express = require('express')
-const app = express()
 const ejs = require('ejs')
 const promise = require('promise')
+// var AV = require('leanengine');
 
-//个人编写
+var app = express();
+
+//个人编写爬虫函数
 const reptileFun=require('./reptile-module')
 var estateStack={}
 
@@ -25,7 +27,8 @@ Array.prototype.inArray = function (obj) {
     return false;
 }
 
-
+// 加载云引擎中间件
+// app.use(AV.express());
 
 const onRequest = (req, res) => {
     res.writeHead(200, {'Content-Type': 'text/html', 'Access-Control-Allow-Origin': '*', 'charset': 'utf-8'})
@@ -50,47 +53,50 @@ const onRequest = (req, res) => {
 
 
 // 首次获取58，西子房源数据
-(function(){
+{
   reptileFun.reptile().then(function(data){
     estateStack=data;
     console.log('首次获取58，西子房源数据成功');
   })
-})();
+};
 
-var rule = new schedule.RecurrenceRule();
-// rule.minute = [0, 15, 45];
-rule.second=[0, 15 ,45];
-var j = schedule.scheduleJob(rule, function(){
-  // 爬虫定时取数据
-  reptileFun.reptile().then(function(data){
-    let comparDat=data;
-    let comparHash={};
-    if (!!estateStack) {
-      //比对数据是否更新
-      for(let key in comparDat){
-        let len=comparDat[key].length;
-        while (len--){
-          let cur=comparDat[key][len];
-          if (!estateStack.inAarry(cur)) {
-            comparHash[key]=true;
-            console.log(comparDat[key][len]+'新数据');
-            console.log(estateStack[key][len]);
+//每个15分钟爬虫取数据比对是否更新
+{
+  var rule = new schedule.RecurrenceRule();
+  // rule.minute = [0, 15, 45];
+  rule.second=[0, 15 ,45];
+  var j = schedule.scheduleJob(rule, function(){
+    // 爬虫定时取数据
+    reptileFun.reptile().then(function(data){
+      let comparDat=data;
+      let comparHash={};
+      if (!!estateStack) {
+        //比对数据是否更新
+        for(let key in comparDat){
+          let len=comparDat[key].length;
+          while (len--){
+            let cur=comparDat[key][len];
+            if (!estateStack.inAarry(cur)) {
+              comparHash[key]=true;
+              console.log(comparDat[key][len]+'新数据');
+              console.log(estateStack[key][len]);
+            }
+          }
+        }
+        for(let site in comparHash){
+          let curSite=comparHash[site];
+          if (curSite) {
+            //更新数据则提醒，并推送数据
+            estateStack[site]=comparDat[site];
           }
         }
       }
-      for(let site in comparHash){
-        let curSite=comparHash[site];
-        if (curSite) {
-          //更新数据则提醒，并推送数据
-          estateStack[site]=comparDat[site];
-        }
-      }
-    }
-  })
-});
+
+    })//
+  });//sechecdule
+}
 
 
-app.set('port', (process.env.PORT || 8080));
 
 app.use(express.static('./dist'));
 // views is directory for all template files
@@ -106,9 +112,32 @@ app.get('/api', function(req, res) {
   onRequest(req, res);
 })
 
+// error handlers
+app.use(function(err, req, res, next) { // jshint ignore:line
+  if (req.timedout && req.headers.upgrade === 'websocket') {
+    // 忽略 websocket 的超时
+    return;
+  }
 
-app.listen(app.get('port'), function() {
-  console.log('my hero is coming', app.get('port'));
+  var statusCode = err.status || 500;
+  if(statusCode === 500) {
+    console.error(err.stack || err);
+  }
+  if(req.timedout) {
+    console.error('请求超时: url=%s, timeout=%d, 请确认方法执行耗时很长，或没有正确的 response 回调。', req.originalUrl, err.timeout);
+  }
+  res.status(statusCode);
+  // 默认不输出异常详情
+  var error = {}
+  if (app.get('env') === 'development') {
+    // 如果是开发环境，则将异常堆栈输出到页面，方便开发调试
+    error = err;
+  }
+  res.render('error', {
+    message: err.message,
+    error: error
+  });
 });
 
 
+module.exports = app;

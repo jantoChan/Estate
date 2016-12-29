@@ -38,7 +38,6 @@ const onRequest = (req, res) => {
     //58
     if (url_param.query && url_param.query=='58') {
         reptileFun.get58(url_param).then(function(data){
-          console.log(data);
           res.write(JSON.stringify(data));
           res.end();
         })
@@ -111,7 +110,6 @@ app.get('/', function(req, res) {
 });
 
 app.get('/api', function(req, res) {
-  console.log('api')
   onRequest(req, res);
 })
 

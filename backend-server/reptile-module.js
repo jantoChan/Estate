@@ -152,14 +152,14 @@ const reptile = () => {
             })
             returnDat['sale58']=sale58;
           }
-          if (Url.indexOf('xz')>-1 && Url.indexOf('sale')>-1) {
+          if (Url.indexOf('xizi')>-1 && Url.indexOf('sale')>-1) {
             $('#main #result_show .result_item.cc').each( (index, item) => {
               let link = $(item).find('h4 a').attr('href');
               salexz.push(link);
             })
             returnDat['salexz']=salexz;
           }
-          if (Url.indexOf('xz')>-1 && Url.indexOf('rent')>-1) {
+          if (Url.indexOf('xizi')>-1 && Url.indexOf('rent')>-1) {
             $('#main #result_show .result_item.cc').each( (index, item) => {
               let link = $(item).find('h4 a').attr('href');
               rentxz.push(link);

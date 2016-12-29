@@ -8,7 +8,7 @@ const schedule = require('node-schedule')
 const express = require('express')
 const ejs = require('ejs')
 const promise = require('promise')
-// var AV = require('leanengine');
+var AV = require('leanengine');
 
 var app = express();
 
@@ -28,7 +28,7 @@ Array.prototype.inArray = function (obj) {
 }
 
 // 加载云引擎中间件
-// app.use(AV.express());
+app.use(AV.express());
 
 const onRequest = (req, res) => {
     res.writeHead(200, {'Content-Type': 'text/html', 'Access-Control-Allow-Origin': '*', 'charset': 'utf-8'})
@@ -38,6 +38,7 @@ const onRequest = (req, res) => {
     //58
     if (url_param.query && url_param.query=='58') {
         reptileFun.get58(url_param).then(function(data){
+          console.log(data);
           res.write(JSON.stringify(data));
           res.end();
         })
@@ -56,6 +57,7 @@ const onRequest = (req, res) => {
 {
   reptileFun.reptile().then(function(data){
     estateStack=data;
+    console.log(data);
     console.log('首次获取58，西子房源数据成功');
   })
 };
@@ -109,6 +111,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/api', function(req, res) {
+  console.log('api')
   onRequest(req, res);
 })
 
